@@ -1,43 +1,49 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from 'react';
+import { Context } from '../store/appContext';
+import ContactCard from './single'; // import contact card component, which maybe I could change folders and not as a view
 
-import { Context } from "../store/appContext";
-
-import "../../styles/demo.css";
-
-export const Demo = () => {
+const Demo = () => {
 	const { store, actions } = useContext(Context);
 
+	useEffect(() => {
+		if (store.agendas.length === 0) {
+			actions.getUserAgenda();  // Ensure agenda is initialized by user input, if needed given that if the user refreshs inside demo, the agenda will be empty. Agenda in my case is always "goguman"
+		}
+	}, [store.agendas.length, actions]);
+
+	//logic to handle detele and update and tell the single component how to react in the view
+	const handleDelete = (contactId) => {
+		if (store.agenda.slug) {
+			actions.deleteContact(store.agenda.slug, contactId);
+		} else {
+			console.error('No agenda available to delete the contact');
+		}
+	};
+
+	const handleUpdate = (updatedContact) => {
+		if (store.agenda.slug) {
+			actions.updateContact(store.agenda.slug, updatedContact.id, updatedContact);
+		} else {
+			console.error('No agenda available to update the contact');
+		}
+	};
+
 	return (
-		<div className="container">
-			<ul className="list-group">
-				{store.demo.map((item, index) => {
-					return (
-						<li
-							key={index}
-							className="list-group-item d-flex justify-content-between"
-							style={{ background: item.background }}>
-							<Link to={"/single/" + index}>
-								<span>Link to: {item.title}</span>
-							</Link>
-							{// Conditional render example
-							// Check to see if the background is orange, if so, display the message
-							item.background === "orange" ? (
-								<p style={{ color: item.initial }}>
-									Check store/flux.js scroll to the actions to see the code
-								</p>
-							) : null}
-							<button className="btn btn-success" onClick={() => actions.changeColor(index, "orange")}>
-								Change Color
-							</button>
-						</li>
-					);
-				})}
-			</ul>
-			<br />
-			<Link to="/">
-				<button className="btn btn-primary">Back home</button>
-			</Link>
+		<div className="container mt-5">
+			<h1 className="mb-4">Contacts</h1>
+			{Array.isArray(store.contacts) && (
+				<div>
+					{store.contacts.map((contact) => (
+						<div className="row mb-3" key={contact.id}>
+							<div className="col">
+								<ContactCard contact={contact} onDelete={handleDelete} onUpdate={handleUpdate} /> 
+							</div>
+						</div>
+					))}
+				</div>
+			)}
 		</div>
 	);
 };
+
+export default Demo;

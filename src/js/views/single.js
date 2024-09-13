@@ -1,26 +1,60 @@
-import React, { useState, useEffect, useContext } from "react";
-import PropTypes from "prop-types";
-import { Link, useParams } from "react-router-dom";
-import { Context } from "../store/appContext";
+import React, { useState } from 'react';
 
-export const Single = props => {
-	const { store, actions } = useContext(Context);
-	const params = useParams();
+const ContactCard = ({ contact, onDelete, onUpdate }) => {
+	const [isEditing, setIsEditing] = useState(false);
+	const [editedContact, setEditedContact] = useState(contact);
+
+	//how to handle the update and edit arrays as well as display the corrected state
+	const handleEditChange = (e) => {
+		const { name, value } = e.target;
+		setEditedContact({
+			...editedContact,
+			[name]: value
+		});
+	};
+
+	const handleUpdate = () => {
+		onUpdate(editedContact);
+		setIsEditing(false);
+	};
+
 	return (
-		<div className="jumbotron">
-			<h1 className="display-4">This will show the demo element: {store.demo[params.theid].title}</h1>
-
-			<hr className="my-4" />
-
-			<Link to="/">
-				<span className="btn btn-primary btn-lg" href="#" role="button">
-					Back home
-				</span>
-			</Link>
+		<div className="card mb-3">
+			<div className="card-body">
+				{isEditing ? (
+					<div>
+						<div className="mb-3">
+							<label className="form-label">Name</label>
+							<input type="text" className="form-control" name="name" value={editedContact.name} onChange={handleEditChange} />
+						</div>
+						<div className="mb-3">
+							<label className="form-label">Email</label>
+							<input type="email" className="form-control" name="email" value={editedContact.email} onChange={handleEditChange} />
+						</div>
+						<div className="mb-3">
+							<label className="form-label">Phone</label>
+							<input type="text" className="form-control" name="phone" value={editedContact.phone} onChange={handleEditChange} />
+						</div>
+						<div className="mb-3">
+							<label className="form-label">Address</label>
+							<input type="text" className="form-control" name="address" value={editedContact.address} onChange={handleEditChange} />
+						</div>
+						<button className="btn btn-primary me-2" onClick={handleUpdate}>Save</button>
+						<button className="btn btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+					</div>
+				) : (
+					<div>
+						<h5 className="card-title">{contact.name}</h5>
+						<p className="card-text">Email: {contact.email}</p>
+						<p className="card-text">Phone: {contact.phone}</p>
+						<p className="card-text">Address: {contact.address}</p>
+						<button className="btn btn-secondary me-2" onClick={() => setIsEditing(true)}>Edit</button>
+						<button className="btn btn-danger" onClick={() => onDelete(contact.id)}>Delete</button>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 };
 
-Single.propTypes = {
-	match: PropTypes.object
-};
+export default ContactCard;
